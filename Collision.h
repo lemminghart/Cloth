@@ -152,6 +152,12 @@ static void Box_Collision(Particle *part, int solver) {
 	}
 }
 
+static void Sphere_Collision(Particle *part, int solver) {
+	
+	//primero hay que checkear si hay colision
+	// if(d(part,center) <  radius) = true
+}
+
 //Calcula TODAS las colisiones del programa
 static void Collision_Manager(Particle *part, int solver) {
 
