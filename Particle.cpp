@@ -19,7 +19,8 @@ Particle::Particle(bool fix, Coord pos) {
 }
 
 Particle::Particle(Particle *part, float separationX, float separationZ) {
-
+	//initial condition = animated
+	fixed = false;
 
 	//setup the initial parameters (position)
 	currentPos.x = part->currentPos.x + separationX;

@@ -21,9 +21,9 @@ namespace Utils {
 	int time = 0;
 	float percent = 0.f;
 	//solver
-	int solver = VERLET; //CAN BE EULER or VERLET
+	int solver = EULER; //CAN BE EULER or VERLET
 	//position of first particle
-	Coord pos{ -3.5f, 9, -3.5f };
+	Coord pos{ -3.5f, 9.75f, -4.75f };
 	//separation between particles
 	float part_separation = 0.5f;
 }
@@ -59,9 +59,22 @@ void PhysicsInit() {
 		}
 	}
 
+	//fijamos las particulas en el techo
+	partArray[0].fixed = true;
+	partArray[ClothMesh::numCols - 1].fixed = true;
+
 }
 void PhysicsUpdate(float dt) {
 	//TODO
+
+	if (Utils::solver == EULER) {
+		for (int i = 0; i < ClothMesh::numVerts; i++) {
+			if (!partArray[i].fixed) {
+				Euler_Solver(&partArray[i], dt);
+				Collision_Manager(&partArray[i], Utils::solver);
+			}
+		}
+	}
 
 	//Update de las particulas
 	float *partVerts = new float[ClothMesh::numVerts * 3];
