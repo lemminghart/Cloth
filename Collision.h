@@ -163,4 +163,7 @@ static void Collision_Manager(Particle *part, int solver) {
 
 	//Check collision with BOX
 	Box_Collision(part, solver);
+
+	//Check collision with the sphere
+	Sphere_Collision(part, solver);
 }

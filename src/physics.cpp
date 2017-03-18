@@ -4,6 +4,7 @@
 #include "../Particle.h"
 #include "../Solvers.h"
 #include "../Collision.h"
+#include "../Sphere.h"
 
 namespace ClothMesh {
 	extern void setupClothMesh();
@@ -26,6 +27,12 @@ namespace Utils {
 	Coord pos{ -3.5f, 9.75f, -4.75f };
 	//separation between particles
 	float part_separation = 0.5f;
+	//
+	
+}
+
+namespace Objects {
+	Esfera *esfera;
 }
 
 bool show_test_window = false;
@@ -46,9 +53,11 @@ void GUI() {
 void PhysicsInit() {
 	//TODO
 
+	//initialize the sphere
+	Objects::esfera = new Esfera;
+
 	//we will set up a first particle and then build the mesh from that particle
 	//set up the first particle
-
 	Particle temp(true, Utils::pos); //the first particle is fixed
 	
 	//we initialite the following particles in base of the first particle
@@ -86,5 +95,6 @@ void PhysicsUpdate(float dt) {
 	ClothMesh::updateClothMesh(partVerts);
 }
 void PhysicsCleanup() {
-	//TODO
+	//delete sphere
+	delete Objects::esfera;
 }
