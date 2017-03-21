@@ -1,9 +1,15 @@
+#include <GL\glew.h>
+#include <glm\gtc\type_ptr.hpp>
+#include <glm\gtc\matrix_transform.hpp>
+#include <cstdio>
+
 #include <imgui\imgui.h>
 #include <imgui\imgui_impl_glfw_gl3.h>
 
 #include "../Particle.h"
 #include "../Solvers.h"
 #include "../Collision.h"
+#include "../Sphere.h"
 
 namespace ClothMesh {
 	extern void setupClothMesh();
@@ -15,6 +21,13 @@ namespace ClothMesh {
 	extern const int numVerts; // 14 * 18 = 252
 }
 
+namespace Sphere {
+	extern void setupSphere(glm::vec3 pos = glm::vec3(0.f, 1.f, 0.f), float radius = 1.f);
+	extern void cleanupSphere();
+	extern void updateSphere(glm::vec3 pos, float radius = 1.f);
+	extern void drawSphere();
+}
+
 //Namespace para manejar variables propias del sistema
 namespace Utils { 
 	//time
@@ -23,10 +36,16 @@ namespace Utils {
 	//solver
 	int solver = EULER; //CAN BE EULER or VERLET
 	//position of first particle
-	Coord pos{ -3.5f, 9.75f, -4.75f };
+	glm::vec3 pos{ -3.5f, 9.75f, -4.75f };
 	//separation between particles
 	float part_separation = 0.5f;
+	//
+	
 }
+
+//variable global de la esfera
+Esfera *esfera;
+
 
 bool show_test_window = false;
 void GUI() {
@@ -46,9 +65,11 @@ void GUI() {
 void PhysicsInit() {
 	//TODO
 
+	//initialize the sphere
+	esfera = new Esfera;
+
 	//we will set up a first particle and then build the mesh from that particle
 	//set up the first particle
-
 	Particle temp(true, Utils::pos); //the first particle is fixed
 	
 	//we initialite the following particles in base of the first particle
@@ -71,11 +92,12 @@ void PhysicsUpdate(float dt) {
 		for (int i = 0; i < ClothMesh::numVerts; i++) {
 			if (!partArray[i].fixed) {
 				Euler_Solver(&partArray[i], dt);
-				Collision_Manager(&partArray[i], Utils::solver);
+				Collision_Manager(&partArray[i], esfera, Utils::solver);
 			}
 		}
 	}
 
+	//------ UPDATE ZONE -------
 	//Update de las particulas
 	float *partVerts = new float[ClothMesh::numVerts * 3];
 	for (int i = 0; i < ClothMesh::numVerts; ++i) {
@@ -84,7 +106,11 @@ void PhysicsUpdate(float dt) {
 			partVerts[i * 3 + 2] = partArray[i].currentPos.z;
 	}
 	ClothMesh::updateClothMesh(partVerts);
+
+	//update de la esfera
+	Sphere::updateSphere(esfera->pos, esfera->radius);
 }
 void PhysicsCleanup() {
-	//TODO
+	//delete sphere
+	delete esfera;
 }

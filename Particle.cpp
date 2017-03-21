@@ -1,7 +1,7 @@
 #include "../Particle.h"
 #include <glm\gtc\matrix_transform.hpp>
 
-Particle::Particle(bool fix, Coord pos) {
+Particle::Particle(bool fix, glm::vec3 pos) {
 	//setup the animation of the particle
 	fixed = fix;
 

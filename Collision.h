@@ -1,15 +1,28 @@
 #pragma once
 #include "../Particle.h"
+#include "../Sphere.h"
 
 //calcula la d del plano
-static float Calculate_d(Coord n, Coord plane_point) {
+static float Calculate_d(glm::vec3 n, glm::vec3 plane_point) {
 	//d = -n·P donde P es un punto del plano
 	return ((-n.x * plane_point.x) + (-n.y * plane_point.y) + (-n.z * plane_point.z));
 }
 
+//calcula la distancia entre la primera componente y la segunda
+static float Calculate_Distance(glm::vec3 p, glm::vec3 q) {
+	//d(p,q) = 
+	return sqrt(pow((q.x - p.x), 2) + pow((q.y - p.y), 2) + pow((q.z - p.z), 2));
+}
+
+//calcula el vector entre la primera componente y la segunda
+static glm::vec3 Calculate_Vector(glm::vec3 p, glm::vec3 q) {
+	//v = (p-q)
+	return glm::vec3 { (q.x-p.x), (q.y - p.y), (q.z - p.z) };
+}
+
 //calcula la Velocidad normal en un rebote (para aplicar la friccion)
-static Coord Calculate_V_Normal(Coord n, Coord v) {
-	Coord Vn; //normal vector
+static glm::vec3 Calculate_V_Normal(glm::vec3 n, glm::vec3 v) {
+	glm::vec3 Vn; //normal vector
 
 			  //v may be the Particle velocity (EULER) or the Lastpos->CurrentPos vector in VERLET
 
@@ -22,8 +35,8 @@ static Coord Calculate_V_Normal(Coord n, Coord v) {
 }
 
 //calcula la Velocidad tangencial en un rebote (para aplicar la friccion)
-static Coord Calculate_V_Tangential(Coord n, Coord v) {
-	Coord Vt; //tangential vector
+static glm::vec3 Calculate_V_Tangential(glm::vec3 n, glm::vec3 v) {
+	glm::vec3 Vt; //tangential vector
 
 			  //v may be the Particle velocity (EULER) or the Lastpos->CurrentPos vector in VERLET
 
@@ -36,7 +49,7 @@ static Coord Calculate_V_Tangential(Coord n, Coord v) {
 }
 
 //Calcula la colisión de una particula con el plano
-static void Calculate_Plane_Collision(Coord n, Particle *part, float d, int solver) {
+static void Calculate_Plane_Collision(glm::vec3 n, Particle *part, float d, int solver) {
 	//Coeficiente de elasticidad
 	float E = 0.7f;
 
@@ -72,7 +85,7 @@ static void Calculate_Plane_Collision(Coord n, Particle *part, float d, int solv
 							 //friction uses the raw variable F of friction
 
 							 //previoulsy we calculate the vector between lastPos & currentPos to calculate Normal & Tangential vectors
-		Coord vector;
+		glm::vec3 vector;
 		vector.x = part->currentPos.x - part->lastPos.x;
 		vector.y = part->currentPos.y - part->lastPos.y;
 		vector.z = part->currentPos.z - part->lastPos.z;
@@ -84,8 +97,55 @@ static void Calculate_Plane_Collision(Coord n, Particle *part, float d, int solv
 	}
 }
 
+//Calcula la colisión de una particula con la esfera
+static void Calculate_Sphere_Collision(Particle *part, Esfera *esfera) {
+	//resolvemos el sistema de ecuaciones entre la recta generada por la posición anterior y la posicion actual con la ecuacion de la esfera
+	//esto nos da una ecuacion de segundo grado, que resolvemos a continuación
+	
+	float alpha1, alpha2; //incógnita del sistema de escuaciones
+	glm::vec3 r1, r2; //puntos de la superficie de la esfera cortados por la recta
+	
+	glm::vec3 vector = Calculate_Vector(part->currentPos, part->lastPos);
+
+	float a = (pow(esfera->pos.x, 2) - pow(vector.x,2) +
+			   pow(esfera->pos.y, 2) - pow(vector.y,2) +
+			   pow(esfera->pos.z, 2) - pow(vector.z,2));
+
+	float b = (2*esfera->pos.x * vector.x +
+			   2*esfera->pos.y * vector.y +
+			   2* esfera->pos.z * vector.z);
+
+	float c = pow(-esfera->radius, 2);
+
+	//Aplicamos la ecuacion de 2ndo grado para resolverlo
+	//como tenemos 2 soluciones posibles obtendremos 2 alphas
+	alpha1 = (-b + sqrt(pow(b, 2) - 4 * a*c)) / (2 * a);
+	alpha2 = (-b - sqrt(pow(b, 2) - 4 * a*c)) / (2 * a);
+
+	//aplicamos las alphas a los posibles puntos
+	//r1
+	r1.x = part->currentPos.x * alpha1 + part->lastPos.x * (1 - alpha1);
+	r1.y = part->currentPos.y * alpha1 + part->lastPos.y * (1 - alpha1);
+	r1.z = part->currentPos.z * alpha1 + part->lastPos.z * (1 - alpha1);
+
+	//r2
+	r2.x = part->currentPos.x * alpha2 + part->lastPos.x * (1 - alpha2);
+	r2.y = part->currentPos.y * alpha2 + part->lastPos.y * (1 - alpha2);
+	r2.z = part->currentPos.z * alpha2 + part->lastPos.z * (1 - alpha2);
+
+	//ahora diferenciamos los puntos buscando cuál está mas cerca de la posición anterior de la particula
+	
+	if (Calculate_Distance(r1, part->lastPos) < Calculate_Distance(r2, part->lastPos)) {
+		//aplicar colision particula plano en el plano tangente a la esfera en punto r1
+	}
+	else {
+		//aplicar colision particula plano en el plano tangente a la esfera en punto r2
+	}
+
+}
+
 //bool que calcula si hay colision con un plano donde n = normal del plano, part = Particula y d = un punto del plano
-static bool Check_Plane_Collision(Coord n, Particle *part, float d) {
+static bool Check_Plane_Collision(glm::vec3 n, Particle *part, float d) {
 
 	//collision = true if ((n·p_t + d)(n·p'_t + d) <= 0)
 	float check = (((n.x * part->lastPos.x) + (n.y * part->lastPos.y) + (n.z * part->lastPos.z)) + d) *
@@ -99,10 +159,24 @@ static bool Check_Plane_Collision(Coord n, Particle *part, float d) {
 	}
 }
 
+//bool que calcula si hay colision entre una particula y una esfera
+static bool Check_Sphere_Collision(Particle *part, Esfera *esfera) {
+
+	//collision = true if if(d(part,center) <  radius)
+	float check = Calculate_Distance(part->currentPos, esfera->pos);
+
+	if (check <= esfera->radius) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 //Calcula la colision con la caja contenedora
 static void Box_Collision(Particle *part, int solver) {
-	Coord n;
-	Coord p;
+	glm::vec3 n;
+	glm::vec3 p;
 
 	//He cogido los 2 extremos del cubo:
 	// {-5,0,-5} : p_bottom, p_left & p_back
@@ -152,15 +226,20 @@ static void Box_Collision(Particle *part, int solver) {
 	}
 }
 
-static void Sphere_Collision(Particle *part, int solver) {
+static void Sphere_Collision(Particle *part, Esfera *esfera) {
 	
 	//primero hay que checkear si hay colision
-	// if(d(part,center) <  radius) = true
+	if (Check_Sphere_Collision(part, esfera)) {
+		Calculate_Sphere_Collision(part, esfera);
+	}
 }
 
 //Calcula TODAS las colisiones del programa
-static void Collision_Manager(Particle *part, int solver) {
+static void Collision_Manager(Particle *part, Esfera *esfera, int solver) {
 
 	//Check collision with BOX
 	Box_Collision(part, solver);
+
+	//Check collision with the sphere
+	Sphere_Collision(part, esfera);
 }
