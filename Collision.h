@@ -107,15 +107,25 @@ static void Calculate_Sphere_Collision(Particle *part, Esfera *esfera, int solve
 	
 	glm::vec3 vector = Calculate_Vector(part->currentPos, part->lastPos);
 
-	float a = (pow(esfera->pos.x, 2) - pow(vector.x,2) +
-			   pow(esfera->pos.y, 2) - pow(vector.y,2) +
-			   pow(esfera->pos.z, 2) - pow(vector.z,2));
+	/*float a = (pow(esfera->pos.x, 2) + pow(vector.x,2) +
+			   pow(esfera->pos.y, 2) + pow(vector.y,2) +
+			   pow(esfera->pos.z, 2) + pow(vector.z,2));
 
-	float b = (2*esfera->pos.x * vector.x +
-			   2*esfera->pos.y * vector.y +
+	float b = (-2*esfera->pos.x * vector.x -
+			   2*esfera->pos.y * vector.y -
 			   2* esfera->pos.z * vector.z);
 
-	float c = pow(-esfera->radius, 2);
+	float c = pow(esfera->radius, 2);*/
+
+	float a = pow(vector.x, 2) + pow(vector.y, 2) + pow(vector.z, 2);
+
+	float b = 2 * part->lastPos.x*vector.x - 2 * esfera->pos.x*vector.x +
+		   	  2 * part->lastPos.y*vector.y - 2 * esfera->pos.y*vector.y +
+			  2 * part->lastPos.z*vector.z - 2 * esfera->pos.z*vector.z;
+
+	float c = pow(part->lastPos.x, 2) + pow(esfera->pos.x, 2) - 2 * esfera->pos.x * part->lastPos.x +
+			  pow(part->lastPos.y, 2) + pow(esfera->pos.y, 2) - 2 * esfera->pos.y * part->lastPos.y +
+			  pow(part->lastPos.z, 2) + pow(esfera->pos.z, 2) - 2 * esfera->pos.z * part->lastPos.z - pow(esfera->radius, 2);
 
 	//Aplicamos la ecuacion de 2ndo grado para resolverlo
 	//como tenemos 2 soluciones posibles obtendremos 2 alphas
@@ -124,14 +134,10 @@ static void Calculate_Sphere_Collision(Particle *part, Esfera *esfera, int solve
 
 	//aplicamos las alphas a los posibles puntos
 	//r1
-	r1.x = part->currentPos.x * alpha1 + part->lastPos.x * (1 - alpha1);
-	r1.y = part->currentPos.y * alpha1 + part->lastPos.y * (1 - alpha1);
-	r1.z = part->currentPos.z * alpha1 + part->lastPos.z * (1 - alpha1);
+	r1 = part->lastPos + Calculate_Vector(part->currentPos, part->lastPos) * alpha1;
 
 	//r2
-	r2.x = part->currentPos.x * alpha2 + part->lastPos.x * (1 - alpha2);
-	r2.y = part->currentPos.y * alpha2 + part->lastPos.y * (1 - alpha2);
-	r2.z = part->currentPos.z * alpha2 + part->lastPos.z * (1 - alpha2);
+	r2 = part->lastPos + Calculate_Vector(part->currentPos, part->lastPos) * alpha2;
 
 	//ahora diferenciamos los puntos buscando cuál está mas cerca de la posición anterior de la particula
 	
