@@ -98,7 +98,7 @@ static void Calculate_Plane_Collision(glm::vec3 n, Particle *part, float d, int 
 }
 
 //Calcula la colisión de una particula con la esfera
-static void Calculate_Sphere_Collision(Particle *part, Esfera *esfera) {
+static void Calculate_Sphere_Collision(Particle *part, Esfera *esfera, int solver) {
 	//resolvemos el sistema de ecuaciones entre la recta generada por la posición anterior y la posicion actual con la ecuacion de la esfera
 	//esto nos da una ecuacion de segundo grado, que resolvemos a continuación
 	
@@ -137,9 +137,13 @@ static void Calculate_Sphere_Collision(Particle *part, Esfera *esfera) {
 	
 	if (Calculate_Distance(r1, part->lastPos) < Calculate_Distance(r2, part->lastPos)) {
 		//aplicar colision particula plano en el plano tangente a la esfera en punto r1
+		glm::vec3 n = glm::normalize(Calculate_Vector(esfera->pos, r1));
+		Calculate_Plane_Collision(n, part, Calculate_d(n, r1), solver);
 	}
 	else {
 		//aplicar colision particula plano en el plano tangente a la esfera en punto r2
+		glm::vec3 n = glm::normalize(Calculate_Vector(esfera->pos, r2));
+		Calculate_Plane_Collision(n, part, Calculate_d(n, r2), solver);
 	}
 
 }
@@ -226,11 +230,11 @@ static void Box_Collision(Particle *part, int solver) {
 	}
 }
 
-static void Sphere_Collision(Particle *part, Esfera *esfera) {
+static void Sphere_Collision(Particle *part, Esfera *esfera, int solver) {
 	
 	//primero hay que checkear si hay colision
 	if (Check_Sphere_Collision(part, esfera)) {
-		Calculate_Sphere_Collision(part, esfera);
+		Calculate_Sphere_Collision(part, esfera, solver);
 	}
 }
 
@@ -241,5 +245,5 @@ static void Collision_Manager(Particle *part, Esfera *esfera, int solver) {
 	Box_Collision(part, solver);
 
 	//Check collision with the sphere
-	Sphere_Collision(part, esfera);
+	Sphere_Collision(part, esfera, solver);
 }
