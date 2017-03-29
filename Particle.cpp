@@ -5,6 +5,9 @@ Particle::Particle(bool fix, glm::vec3 pos) {
 	//setup the animation of the particle
 	fixed = fix;
 
+	//setup the initial forces
+	forces = { 0,0,0 };
+
 	//setup the initial parameters (position)
 	currentPos = pos;
 
@@ -21,6 +24,9 @@ Particle::Particle(bool fix, glm::vec3 pos) {
 Particle::Particle(Particle *part, float separationX, float separationZ) {
 	//initial condition = animated
 	fixed = false;
+
+	//setup the initial forces
+	forces = { 0,0,0 };
 
 	//setup the initial parameters (position)
 	currentPos.x = part->currentPos.x + separationX;

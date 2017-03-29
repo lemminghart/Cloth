@@ -10,6 +10,7 @@
 #include "../Solvers.h"
 #include "../Collision.h"
 #include "../Sphere.h"
+#include "../Forces.h"
 
 namespace ClothMesh {
 	extern void setupClothMesh();
@@ -90,6 +91,7 @@ void PhysicsUpdate(float dt) {
 
 	if (Utils::solver == EULER) {
 		for (int i = 0; i < ClothMesh::numVerts; i++) {
+			Calculate_Forces(i);
 			if (!partArray[i].fixed) {
 				Euler_Solver(&partArray[i], dt);
 				Collision_Manager(&partArray[i], esfera, Utils::solver);
