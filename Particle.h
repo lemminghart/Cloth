@@ -12,6 +12,7 @@ public:
 	glm::vec3 forces; //Stores the resultant of the forces applied to this particle in a determined instant of time
 	//float lifeTime; //Life time of the particle
 	bool fixed; //states if particle is animated or not
+	int index;
 
 	Particle(bool fix, glm::vec3 pos);
 	Particle(Particle *part, float separationX, float separationZ);

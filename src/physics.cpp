@@ -72,11 +72,15 @@ void PhysicsInit() {
 	//we will set up a first particle and then build the mesh from that particle
 	//set up the first particle
 	Particle temp(true, Utils::pos); //the first particle is fixed
-	
+	temp.index = 0;
+	partArray.push_back(temp);
+
 	//we initialite the following particles in base of the first particle
 	for (int i = 1; i <= ClothMesh::numRows; i++) {
 		for (int j = 1; j <= ClothMesh::numCols; j++) {
 			Particle temp2(&temp, Utils::part_separation * j, Utils::part_separation * i);
+			temp2.index = (j-1) + (ClothMesh::numRows * (i-1)) + 1;
+			printf("%d \n", temp2.index);
 			partArray.push_back(temp2);
 		}
 	}
@@ -89,9 +93,14 @@ void PhysicsInit() {
 void PhysicsUpdate(float dt) {
 	//TODO
 
+	//Calculamos primero las fuerzas que afectan las particulas
+	for (int i = 0; i < ClothMesh::numVerts; i++) {
+		Calculate_Forces(partArray[i]);
+	}
+
+	//Actualizamos la posicion de las particulas
 	if (Utils::solver == EULER) {
 		for (int i = 0; i < ClothMesh::numVerts; i++) {
-			Calculate_Forces(i);
 			if (!partArray[i].fixed) {
 				Euler_Solver(&partArray[i], dt);
 				Collision_Manager(&partArray[i], esfera, Utils::solver);

@@ -20,7 +20,9 @@ static void Euler_Solver(Particle *part, float dt) {
 	//Calculate the new velocity
 	// V = V. + dt * (F/m)[acceleration]
 	//We only need to recalculate the V on Y, it's the only one affected by external force
-	part->currentV.y = part->currentV.y + (dt * GRAVITY);
+	part->currentV.x = part->currentV.x + (dt * part->forces.x);
+	part->currentV.y = part->currentV.y + (dt * (GRAVITY + part->forces.y));
+	part->currentV.z = part->currentV.z + (dt * part->forces.z);
 }
 
 static void Verlet_Solver(Particle *part, float dt) {
