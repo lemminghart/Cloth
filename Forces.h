@@ -2,8 +2,8 @@
 #include "../Particle.h"
 #include "../Collision.h"
 
-#define ke 1.f
-#define kd .05f
+#define ke 10.f
+#define kd 2.f
 
 struct Index {
 	int F, C; //Fila & Columna
@@ -35,6 +35,7 @@ static int Reverse_Index(Index index) {
 	return (index.C * ClothMesh::numCols);
 }
 
+
 static void Apply_Formula(Particle P1, Particle P2) {
 	//F_1 = - (ke(||P1-P2|| - L_12) + kd(v1-v2) · (P1-P2/||P1-P2||)) * (P1-P2/||P1-P2||)
 
@@ -57,23 +58,21 @@ static void Calculate_Structural(Particle part, int tempIndex, int indice) {
 		printf("%d izquierda %d \n", part.index, part.index -1);
 	}
 	//comrpobar derecha
-	if ((part.index % ClothMesh::numCols) < (ClothMesh::numCols + 1)) {
+	if ((part.index % ClothMesh::numCols) < (ClothMesh::numCols-1)) {
 		Apply_Formula(partArray[part.index], partArray[part.index + 1]);
 		printf("%d derecha %d \n", part.index, part.index +1);
 	}
 	//VERTICAL
-	////comprobar arriba
-	//if (part.index > 0) {
-	//	tempIndex = Reverse_Index(Index{ (part.index),(partIndex.F - 1) });
-	//	Apply_Formula(partArray[indice], partArray[tempIndex]);
-	//	printf("%d arriba %d \n", indice, tempIndex);
-	//}
-	////comprobar abajo
-	//if (part.index < (ClothMesh::numRows - 1)) {
-	//	tempIndex = Reverse_Index(Index{ (partIndex.C),(partIndex.F + 1) });
-	//	Apply_Formula(partArray[indice], partArray[tempIndex]);
-	//	printf("%d abajo %d \n", indice, tempIndex);
-	//}	
+	//comprobar arriba
+	if (part.index > ClothMesh::numCols) {
+		Apply_Formula(partArray[part.index], partArray[part.index - ClothMesh::numCols]);
+		printf("%d arriba %d \n", part.index, part.index - ClothMesh::numCols);
+	}
+	//comprobar abajo
+	if (part.index < (ClothMesh::numCols * ClothMesh::numRows) - ClothMesh::numCols) {
+		Apply_Formula(partArray[part.index], partArray[part.index + ClothMesh::numCols]);
+		printf("%d abajo %d \n", part.index, part.index + ClothMesh::numCols);
+	}	
 }
 
 static float Calculate_Shear(Index partIndex, int tempIndex, int indice) {

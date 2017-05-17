@@ -71,18 +71,30 @@ void PhysicsInit() {
 
 	//we will set up a first particle and then build the mesh from that particle
 	//set up the first particle
-	Particle temp(true, Utils::pos); //the first particle is fixed
-	temp.index = 0;
-	partArray.push_back(temp);
+	
 
 	//we initialite the following particles in base of the first particle
-	for (int i = 1; i <= ClothMesh::numRows; i++) {
-		for (int j = 1; j <= ClothMesh::numCols; j++) {
-			Particle temp2(&temp, Utils::part_separation * j, Utils::part_separation * i);
-			temp2.index = (j-1) + (ClothMesh::numRows * (i-1)) + 1;
-			printf("%d \n", temp2.index);
-			partArray.push_back(temp2);
+	for (int i = 0; i < ClothMesh::numRows; i++) {
+		for (int j = 0; j < ClothMesh::numCols; j++) {
+			if (i == 0 && j == 0) {
+				Particle temp(true, Utils::pos); //the first particle is fixed
+				temp.index = 0;
+				partArray.push_back(temp);
+			}
+			else {
+				Particle temp2(&partArray[0], Utils::part_separation * j, Utils::part_separation * i);
+				//temp2.index = (j + ClothMesh::numCols * i)+1;
+				//printf("%d \n", temp2.index);
+				partArray.push_back(temp2);
+			}
 		}
+	}
+
+	//partArray.pop_back();
+
+	for (int i = 0; i < ClothMesh::numVerts; i++) {
+		partArray[i].index = i;
+		printf("%d \n", i);
 	}
 
 	//fijamos las particulas en el techo
@@ -93,20 +105,20 @@ void PhysicsInit() {
 void PhysicsUpdate(float dt) {
 	//TODO
 
-	//Calculamos primero las fuerzas que afectan las particulas
-	for (int i = 0; i < ClothMesh::numVerts; i++) {
-		Calculate_Forces(partArray[i]);
-	}
+	////Calculamos primero las fuerzas que afectan las particulas
+	//for (int i = 0; i < ClothMesh::numVerts; i++) {
+	//	Calculate_Forces(partArray[i]);
+	//}
 
-	//Actualizamos la posicion de las particulas
-	if (Utils::solver == EULER) {
-		for (int i = 0; i < ClothMesh::numVerts; i++) {
-			if (!partArray[i].fixed) {
-				Euler_Solver(&partArray[i], dt);
-				Collision_Manager(&partArray[i], esfera, Utils::solver);
-			}
-		}
-	}
+	////Actualizamos la posicion de las particulas
+	//if (Utils::solver == EULER) {
+	//	for (int i = 0; i < ClothMesh::numVerts; i++) {
+	//		if (!partArray[i].fixed) {
+	//			Euler_Solver(&partArray[i], dt);
+	//			Collision_Manager(&partArray[i], esfera, Utils::solver);
+	//		}
+	//	}
+	//}
 
 	//------ UPDATE ZONE -------
 	//Update de las particulas
